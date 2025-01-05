@@ -8,5 +8,3 @@ class Node:
         self.resource_replenishment = resource_replenishment
         self.agent_density = agent_density
         self.behavioural_state = behavioural_state
-
-        
