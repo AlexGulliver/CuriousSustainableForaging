@@ -1,0 +1,2 @@
+# Online_Learning_of_Temporal_Dependencies_for_Sustainable_Foraging_Problem
+Accompanying code for the paper: Online Learning of Temporal Dependencies for Sustainable Foraging Problem
