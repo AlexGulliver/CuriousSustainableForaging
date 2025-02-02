@@ -17,41 +17,39 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 from tqdm import tqdm
 
-from agent import BaseAgent, NE_Agent, Greedy_Agent, Moderate_Agent
+from agent import BaseAgent, Greedy_Agent, Moderate_Agent
 
 # Define environment
 class Environment:
-    def __init__(self, initial_resources, regeneration_rate, carrying_capacity, resource_cap):
+    """ Models environment."""
+    def __init__(self, initial_resources, regeneration_rate, carrying_capacity, resource_cap, gridsize):
         self.resources = initial_resources
         self.regeneration_rate = regeneration_rate
         self.carrying_capacity = carrying_capacity
         self.resource_cap = resource_cap
-
+        self.gridsize = gridsize # Gridsize variable used to determine the length and width of the grid the agents will spawn in
 
 def simulate_foraging(params_dict):
     """ Core function to simulate foraging agents for a specified set of parameters """
 
     # unpack required parameters
-    env_params, agent_params, pop_params, DQN_params, NE_params, LSTM_params, expmt_params = tuple(params_dict.values())
+    env_params, agent_params, pop_params, expmt_params = tuple(params_dict.values())
     expmt_name, num_timesteps, num_runs = tuple(expmt_params.values())
 
     # initialise environment
     r1, alpha, K, size = tuple(env_params.values())
     num_agents = sum(tuple(pop_params.values()))
     C = r1*num_agents # environment resource cap
-    env = Environment(initial_resources=(r1*num_agents), regeneration_rate=alpha, carrying_capacity=K, resource_cap=C)
+    env = Environment(initial_resources=(r1*num_agents), regeneration_rate=alpha, carrying_capacity=K, resource_cap=C, gridsize=size)
 
     # initialise agents
-    n_moderate, n_greedy, n_DRQN, n_LSTMDRQN, n_NE, n_LSTMNE = tuple(pop_params.values()) # unpack populations
+    n_moderate, n_greedy = tuple(pop_params.values()) # unpack populations
     agents = [] # create list for agent instances
     
     # initialise required number of agents for each class and add to list
     agents.extend([Moderate_Agent(agent_params) for _ in range(n_moderate)])
     agents.extend([Greedy_Agent(agent_params) for _ in range(n_greedy)])
-    agents.extend([DRQN_Agent(agent_params, DQN_params) for _ in range(n_DRQN)])
-    agents.extend([LSTM_DRQN_Agent(agent_params, DQN_params, LSTM_params) for _ in range(n_LSTMDRQN)])
-    agents.extend([NE_Agent(agent_params, NE_params) for _ in range(n_NE)])
-    agents.extend([LSTM_NE_Agent(agent_params, NE_params, LSTM_params) for _ in range(n_LSTMNE)])
+
 
     # Create initial observation
     taus = agent_params.get('agent threshold energy')
@@ -138,11 +136,11 @@ def simulate_foraging(params_dict):
 
     stats = [mean_lifetime, mean_gather_amount, mean_reward, survival_rate]
 
-    obervations = np.array(observations)
-    return obervations, stats
+    observations = np.array(observations)
+    return observations, stats
 
 def repeated_simulations(params_dict):
-    """ conducts repeated simulations for a given set of parameters for a specified number of runs """
+    """ Conducts repeated simulations for a given set of parameters for a specified number of runs """
     expmt_name, num_timesteps, num_runs = tuple(params_dict['expmt_params'].values()) # unpack experiment parameters
     run_progbar = tqdm(total=num_runs, desc='Conducting simulations') # create progress bar
 
@@ -384,28 +382,24 @@ params_dict = {
     'pop_params': { # dictates number of agents of each type to be simulated
         'moderate': 0,
         'greedy': 0,
-        'DRQN': 0,
-        'LSTM-DRQN': 0,
-        'NE': 0,
-        'LSTM-NE': 0
     },
-    'DQN_params': { # Q-learning parameters used for DRQN agents
-        'learning rate': 0.025,
-        'discount factor': 0.95,
-        'exploration rate': 1,
-        'exploration decay': 0.99
-    },
-    'NE_params': { # EA parameters used for online neuroevolution agents
-        'pop_size': 30,
-        'tournament size': 5,
-        'mutation rate': 0.2,
-        'mutation scale': 0.06
-    },
-    'LSTM_params': { # parameters for LSTM networks
-        'observation length': 25, # length of series of observations to be passed to LSTM
-        'reward length': 1, # not used in current implementation
-        'discount factor': 0.95
-    },
+    # 'DQN_params': { # Q-learning parameters used for DRQN agents
+    #     'learning rate': 0.025,
+    #     'discount factor': 0.95,
+    #     'exploration rate': 1,
+    #     'exploration decay': 0.99
+    # },
+    # 'NE_params': { # EA parameters used for online neuroevolution agents
+    #     'pop_size': 30,
+    #     'tournament size': 5,
+    #     'mutation rate': 0.2,
+    #     'mutation scale': 0.06
+    # },
+    # 'LSTM_params': { # parameters for LSTM networks
+    #     'observation length': 25, # length of series of observations to be passed to LSTM
+    #     'reward length': 1, # not used in current implementation
+    #     'discount factor': 0.95
+    # },
     'expmt_params': {
         'experiment name': 'None',
         'num timesteps': 1000,
@@ -416,5 +410,5 @@ params_dict = {
 agent_types = ['moderate', 'greedy'] # specify models for comparison, if none all models are compared
 observations, stats = compare_models(params_dict, num_agents=1, keys=agent_types) # run model comparison
 print(stats) # [mean lifetime, mean amount gathered, mean total reward, survival rate]
-title = 'Moderate and greedy baseline agents'
+title = 'Moderate and Greedy baseline agents'
 plot_models(params_dict, observations, agent_types, title) # Plot model comparison
