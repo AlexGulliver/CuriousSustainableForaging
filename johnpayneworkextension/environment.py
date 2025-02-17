@@ -27,7 +27,7 @@ class Environment:
         self.regeneration_rate = regeneration_rate
         self.carrying_capacity = carrying_capacity
         self.resource_cap = resource_cap
-        self.gridsize = gridsize # Gridsize variable used to determine the length and width of the grid the agents will spawn in
+        self.grid = np.zeros((gridsize, gridsize), dtype=int)# Gridsize variable used to determine the length and width of the grid the agents will spawn in
 
 def simulate_foraging(params_dict):
     """ Core function to simulate foraging agents for a specified set of parameters """

@@ -12,6 +12,7 @@ class BaseAgent:
 
         self.alive = True
         self.time_alive = 0
+        self.position = [] # Choose random start position in the grid
 
         self.actions = []
         self.gathering = False
@@ -22,6 +23,11 @@ class BaseAgent:
     
     def perform_action(self, available_resources):
         """ Determines how many resources are gathered by agents and adds this to their energy """
+
+        # move position
+        #   if self.position contains resource and self.gathering is true
+        #       gather amounts
+        
 
         if self.gathering == True:
             #TODO : Add validation check for agent position as compared to resource
